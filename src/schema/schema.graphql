@@ -2,14 +2,14 @@ type Query {
    "Obtenemos la lista de todos los usuarios"
    users: [User!]!
    "Iniciamos sesión en el sistema"
-   login(email: String!, password: String!): User!
+   login(email: String!, password: String!): ResultUser!
    "Obtener nuestra información con el token"
    me: User!
 }
 
 type Mutation {
     "Registro de los usuarios en el sitema"
-    register(user: UserInput): User!
+    register(user: UserInput): ResultUser!
 }
 
 type User {
@@ -26,4 +26,10 @@ input UserInput {
     lastname: String!
     email: String!
     password: String!
+}
+
+type ResultUser {
+    status: Boolean!
+    message: String!
+    user: User
 }

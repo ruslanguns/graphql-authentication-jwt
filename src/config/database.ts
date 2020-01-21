@@ -13,6 +13,8 @@ class Database {
         if (client.isConnected()) {
             console.log('DATABASE', chalk.greenBright('ONLINE'), db.databaseName.toUpperCase())
         }
+
+        return db;
     }
 }
 
