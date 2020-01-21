@@ -4,22 +4,40 @@ import cors from 'cors';
 import schema from './schema';
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
-const app = express();
+import environments from './config/environments';
+import Database from './config/database';
+import chalk from 'chalk';
 
-app.use('*', cors());
+if (process.env.NODE_ENV !== 'production') {
+    const env = environments;
+    console.log(env);
+}
 
-app.use(compression());
+async function init() {
+    const app = express();
 
-const server = new ApolloServer({
-    schema,
-    introspection: true
-});
+    app.use('*', cors());
+    app.use(compression());
 
-server.applyMiddleware({ app });
+    const database = new Database();
+    const db = await database.init();
 
-const PORT = 5300;
-const httpServer = createServer(app);
-httpServer.listen(
-    { port : PORT },
-    () => console.log(`Hola Mundo API GraphQL http://localhost:${PORT}/graphql`)
-);
+    const context: any = async ({ req, connection }: any) => {
+        return { db };
+    }
+
+    const server = new ApolloServer({
+        schema,
+        context,
+        introspection: true
+    });
+    server.applyMiddleware({ app });
+
+    const PORT = process.env.PORT || 5300;
+    const httpServer = createServer(app);
+
+    httpServer
+        .listen({ port: PORT }, () => console.log(`Server GraphQL running at: ${chalk.blueBright(`http://localhost:${PORT}/graphql`)} `));
+}
+
+init();

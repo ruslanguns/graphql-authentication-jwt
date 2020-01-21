@@ -1,5 +1,29 @@
- type Query {
-    hola: String!
-    holaConNombre(nombre: String!): String!
-    holaAlCursoGraphQL: String!
+type Query {
+   "Obtenemos la lista de todos los usuarios"
+   users: [User!]!
+   "Iniciamos sesión en el sistema"
+   login(email: String!, password: String!): User!
+   "Obtener nuestra información con el token"
+   me: User!
+}
+
+type Mutation {
+    "Registro de los usuarios en el sitema"
+    register(user: UserInput): User!
+}
+
+type User {
+    id: ID!
+    name: String!
+    lastname: String!
+    email: String!
+    password: String
+    registerDate: String!
+}
+
+input UserInput {
+    name: String!
+    lastname: String!
+    email: String!
+    password: String!
 }
