@@ -1,4 +1,5 @@
 import { IResolvers } from "graphql-tools";
+import Jwt from '../lib/jwt';
 
 const query: IResolvers = {
     Query: {
@@ -6,27 +7,32 @@ const query: IResolvers = {
             return await db.collection('users').find().toArray();
         },
         async login(_: void, { email, password }, { db }): Promise<any> {
-            return await db.collection('users').findOne({ email, password })
-                .then((user: any) => {
-                    if (!user) {
-                        return {
-                            status: false,
-                            message: 'Usuario / Contraseña equivocada',
-                            user: null
-                        };
-                    }
-                    return {
-                        status: true,
-                        message: 'Login correcto',
-                        user
-                    };
-                }).catch((err: any) => {
-                    return {
-                        status: false,
-                        message: 'Usuario / Contraseña equivocada',
-                        user: null
-                    };
-                });
+            const user = await db.collection('users').findOne({ email });
+
+            if (!user) {
+                return {
+                    status: false,
+                    message: 'Login incorrecto, usuario no existe',
+                    token: null
+                }
+            }
+
+            if (password !== user.password) {
+                return {
+                    status: false,
+                    message: 'Login incorrecto, contraseña incorrecta',
+                    token: null
+                }
+            }
+
+            delete user.password;
+
+            return {
+                status: true,
+                message: 'Login correcto',
+                token: new Jwt().sing({ user })
+            };
+
         }
     }
 }
