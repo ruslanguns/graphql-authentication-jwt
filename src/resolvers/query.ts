@@ -1,5 +1,6 @@
 import { IResolvers } from "graphql-tools";
 import Jwt from '../lib/jwt';
+import bcryptjs from 'bcryptjs';
 
 const query: IResolvers = {
     Query: {
@@ -17,14 +18,13 @@ const query: IResolvers = {
                 }
             }
 
-            if (password !== user.password) {
+            if (!bcryptjs.compareSync(password, user.password)) {
                 return {
                     status: false,
                     message: 'Login incorrecto, contraseña incorrecta',
                     token: null
                 }
             }
-
             delete user.password;
 
             return {
@@ -33,6 +33,23 @@ const query: IResolvers = {
                 token: new Jwt().sing({ user })
             };
 
+        },
+        me(_: void, __: void, { token }) {
+            let info: any = new Jwt().verify(token);
+
+            if (info === 'La autenticación del token es inválido. Por favor inicia sesión de nuevo para generar un nuevo token.') {
+                return {
+                    status: false,
+                    message: info,
+                    user: null
+                }
+            }
+
+            return {
+                status: true,
+                message: 'Token correcto',
+                user: info.user
+            }
         }
     }
 }
